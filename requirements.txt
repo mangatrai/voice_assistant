@@ -2,10 +2,15 @@
 streamlit
 openai
 astrapy
-pyttsx3
 numpy
 sounddevice
 scripy
 dotenv
 gTTS
 playsound
+langchain
+tiktoken
+cassandra-driver
+cassio
+pypdf
+pandas
