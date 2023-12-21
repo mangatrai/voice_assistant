@@ -1,0 +1,11 @@
+# pip3 install -r requirements.txt
+streamlit
+openai
+astrapy
+pyttsx3
+numpy
+sounddevice
+scripy
+dotenv
+gTTS
+playsound
