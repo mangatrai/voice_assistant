@@ -8,6 +8,7 @@ from astrapy.db import AstraDB
 from gtts import gTTS
 from playsound import playsound
 import streamlit as st
+import pyttsx3
 
 # Load the .env file
 if not load_dotenv(find_dotenv(),override=True):
@@ -40,27 +41,28 @@ class VoiceAssistant:
         Records audio from the user and transcribes it.
         """
         print("Listening...")
-        # Record the audio
-        duration = 3  # Record for 3 seconds
-        fs = 44100  # Sample rate
+        with st.spinner('Listening to 🧑‍💻'):
+            # Record the audio
+            duration = 3  # Record for 3 seconds
+            fs = 44100  # Sample rate
 
-        audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype=np.int16)
-        sd.wait()
+            audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype=np.int16)
+            sd.wait()
 
-        # Save the NumPy array to a temporary wav file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav_file:
-            wavfile.write(temp_wav_file.name, fs, audio)
+            # Save the NumPy array to a temporary wav file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav_file:
+                wavfile.write(temp_wav_file.name, fs, audio)
 
-            # Use the temporary wav file in the OpenAI API
-            #transcript = openai.audio.transcriptions.create("whisper-1", temp_wav_file)
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=temp_wav_file.file
-            )
+                # Use the temporary wav file in the OpenAI API
+                #transcript = openai.audio.transcriptions.create("whisper-1", temp_wav_file)
+                transcript = client.audio.transcriptions.create(
+                    model="whisper-1", 
+                    file=temp_wav_file.file
+                )
 
-        #print(f"User: {transcript['text']}")
-        print(transcript.text)
-        return transcript.text
+            #print(f"User: {transcript['text']}")
+            print(transcript.text)
+            return transcript.text
 
     def think(self, text):
         """
@@ -70,7 +72,7 @@ class VoiceAssistant:
         self.history.append({"role": "user", "content": text})
         # Send the conversation to the GPT API
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-1106-preview",
             messages=self.history,
             temperature=0.5
         )
@@ -81,9 +83,24 @@ class VoiceAssistant:
         return message
     
     def text_to_speech(self, text, lang='en'):
-        tts = gTTS(text=text, lang=lang)
-        tts.save("output.mp3")
-        playsound("output.mp3")
+        with st.spinner('Generating Audio Response'):
+            tts = gTTS(text=text, lang=lang)
+            tts.save("output.mp3")
+        with st.spinner('Playing Audio Response'):
+            playsound("output.mp3")
+
+    def speak(self, text):
+        """"
+        Converts text to speech and plays it.
+        """
+        # Initialize the speech engine
+        engine = pyttsx3.init()
+
+        # Convert text to speech
+        engine.say(text)
+
+        # Block while processing all currently queued commands
+        engine.runAndWait()
 
 
 if __name__ == "__main__":
@@ -98,7 +115,7 @@ if __name__ == "__main__":
     
     if st.button('Ask Me! :studio_microphone:'):
         assistant = VoiceAssistant()
-        while True:
+        while True:            
             text = assistant.listen()
             
             with st.chat_message("user",avatar="🧑‍💻"):

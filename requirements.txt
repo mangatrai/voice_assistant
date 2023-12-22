@@ -14,3 +14,5 @@ cassandra-driver
 cassio
 pypdf
 pandas
+langchain
+pyttsx3

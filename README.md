@@ -22,10 +22,12 @@ numpy
 You can start the assistant by running the nanoassistant.py script:
 
 ```
-python nanoassistant.py
+python app.py
 ```
 
-The assistant will start listening for your commands. You can speak your commands, and the assistant will respond. To stop the assistant, say "goodbye".
+The assistant will start listening for your commands. You can speak your commands, and the assistant will respond. 
+
+To stop the assistant, say "goodbye".
 
 ## Contribution
 Feel free to fork this project, make some changes, and submit a pull request. All contributions are welcome!

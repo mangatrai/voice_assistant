@@ -36,6 +36,10 @@ from langchain.schema.runnable import RunnableMap
 
 from langchain.callbacks.base import BaseCallbackHandler
 
+client = OpenAI(
+  api_key=os.getenv('OPENAI_API_KEY')
+)
+
 print("Started Voice Assistant App")
 
 # Streaming call back handler for responses
@@ -111,55 +115,39 @@ def logout():
     st.cache_resource.clear()
     st.session_state.clear()
 
-def listen(self):
+def listen():
     """
     Records audio from the user and transcribes it.
     """
     print("Listening...")
-    # Record the audio
-    duration = 3  # Record for 3 seconds
-    fs = 44100  # Sample rate
+    with st.spinner('Listening to 🧑‍💻'):
+        # Record the audio
+        duration = 3  # Record for 3 seconds
+        fs = 44100  # Sample rate
 
-    audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype=np.int16)
-    sd.wait()
+        audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype=np.int16)
+        sd.wait()
 
-    # Save the NumPy array to a temporary wav file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav_file:
-        wavfile.write(temp_wav_file.name, fs, audio)
+        # Save the NumPy array to a temporary wav file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav_file:
+            wavfile.write(temp_wav_file.name, fs, audio)
 
-        # Use the temporary wav file in the OpenAI API
-        #transcript = openai.audio.transcriptions.create("whisper-1", temp_wav_file)
-        transcript = client.audio.transcriptions.create(
-            model="whisper-1", 
-            file=temp_wav_file.file
-        )
+            # Use the temporary wav file in the OpenAI API
+            #transcript = openai.audio.transcriptions.create("whisper-1", temp_wav_file)
+            transcript = client.audio.transcriptions.create(
+                model="whisper-1", 
+                file=temp_wav_file.file
+            )
 
-    #print(f"User: {transcript['text']}")
-    print(transcript.text)
-    return transcript.text
-
-def think(self, text):
-    """
-    Generates a response to the user's input.
-    """
-    # Add the user's input to the assistant's history
-    self.history.append({"role": "user", "content": text})
-    # Send the conversation to the GPT API
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=self.history,
-        temperature=0.5
-    )
-    # Extract the assistant's response from the API response
-    message = response.choices[0].message.content
-    self.history.append({"role": "system", "content": message})
-    print('Assistant: ', message)
-    return message
-
-def text_to_speech(self, text, lang='en'):
-    tts = gTTS(text=text, lang=lang)
-    tts.save("output.mp3")
-    playsound("output.mp3")
+        print(transcript.text)
+        return transcript.text
+    
+def text_to_speech(text, lang='en'):
+    with st.spinner('Generating Audio Response'):
+        tts = gTTS(text=text, lang=lang)
+        tts.save("output_{username}.mp3")
+    with st.spinner('Playing Audio Response'):
+        playsound("output_{username}.mp3")
 
 # Function for Vectorizing uploaded data into Astra DB
 def vectorize_text(uploaded_files):
@@ -307,9 +295,9 @@ def load_memory():
 @st.cache_data()
 def load_prompt():
     print("load_prompt")
-    template = """You're a helpful AI assistant tasked to answer the user's questions.
-You're friendly and you answer extensively with multiple sentences.
-If you don't know the answer, just say 'I do not know the answer'.
+    template = """You are an helpful AI assistant tasked to answer the user's questions in English.
+    You are friendly and your answers are brief and informative upto 100 words.
+    If you don't know the answer, just say 'I do not know the answer''.
 
 Use the following context to answer the question:
 {context}
@@ -404,8 +392,9 @@ with st.sidebar:
 for message in st.session_state.messages:
     st.chat_message(message.type).markdown(message.content)
 
-# Now get a prompt from a user
-if question := st.chat_input(lang_dict['assistant_question']):
+# Now get a prompt from a user using voice conversion
+if st.button('Ask Astra! :studio_microphone:'):
+    question = listen()
     print(f"Got question {question}")
 
     # Add the prompt to messages, stored in session state
@@ -440,8 +429,8 @@ if question := st.chat_input(lang_dict['assistant_question']):
             {"question": question, 'chat_history': history},
             config={'callbacks': [StreamHandler(response_placeholder)]}
         )
-        print(f"Response: {response}")
-        print(embedding.embed_query(question))
+        # Convert Response to Audio and play the audio
+        text_to_speech(response.content)
         content = response.content
 
         # Write the sources used
