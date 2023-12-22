@@ -7,6 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 from astrapy.db import AstraDB
 from gtts import gTTS
 from playsound import playsound
+import streamlit as st
 
 # Load the .env file
 if not load_dotenv(find_dotenv(),override=True):
@@ -31,7 +32,7 @@ class VoiceAssistant:
     def __init__(self):
         # Initialize the assistant's history
         self.history = [
-                {"role": "system", "content": "You are a helpful assistant. The user is english. Only speak english."}
+                {"role": "system", "content": "You are an helpful AI assistant tasked to answer the user's questions in English.You are friendly and your answers are brief and informative upto 100 words. If you don't know the answer, just say 'I do not know the answer'"}
             ]
         
     def listen(self):
@@ -86,15 +87,32 @@ class VoiceAssistant:
 
 
 if __name__ == "__main__":
-    assistant = VoiceAssistant()
-
-    while True:
-        text = assistant.listen()
-
-        if "goodbye" in text.strip().lower():
-            print("Assistant: Goodbye! Have a great day!")
-            assistant.text_to_speech("Goodbye! Have a great day!")
-            break
-        
-        response = assistant.think(text)
-        assistant.text_to_speech(response)
+    
+    ##################################
+    st.title('🚲 Astra Voice Assistant')
+    st.write("This voice assistant takes voice command from user and uses OpenAI to answer the questions")
+    with st.expander('**Scenario Details**'):
+        st.write("""
+    User voice input is converted to text using OpenAI audio API. Using ChatCompletion API OpenAI answer the questions. 
+    """)
+    
+    if st.button('Ask Me! :studio_microphone:'):
+        assistant = VoiceAssistant()
+        while True:
+            text = assistant.listen()
+            
+            with st.chat_message("user",avatar="🧑‍💻"):
+                st.write(text)
+            
+            if "goodbye" in text.strip().lower():
+                print("Assistant: Goodbye! Have a great day!")
+                
+                with st.chat_message("assistant", avatar="🤖"):
+                    st.write("Goodbye! Have a great day! :wave:")
+                assistant.text_to_speech("Goodbye! Have a great day!")
+                break
+            
+            response = assistant.think(text)
+            with st.chat_message("assistant", avatar="🤖"):
+                st.write(response)
+            assistant.text_to_speech(response)
