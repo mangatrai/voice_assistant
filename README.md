@@ -10,19 +10,25 @@ Astra Voice Assistnat is a simple voice assistant developed using Python. It use
 To run this application, you will need:  
 
 Python 3.10. (I tested with this version)
-OpenAI Python
-SoundDevice
-gtts
-playsound
-scipy
+streamlit
+openai
+astrapy
 numpy
-
+sounddevice
+scripy
+gTTS
+playsound
+langchain
+tiktoken
+pypdf
+pandas
+langchain
 
 ## Usage
-You can start the assistant by running the nanoassistant.py script:
+You can start the assistant by running the app.py script. It uses Streamlit to render the UI:
 
 ```
-python app.py
+streamlit run app.py
 ```
 
 The assistant will start listening for your commands. You can speak your commands, and the assistant will respond. 
