@@ -35,6 +35,9 @@ The assistant will start listening for your commands. You can speak your command
 
 To stop the assistant, say "goodbye".
 
+## Demo Video
+<video src="assets/video1854402426.mp4" controls title="End To End Demo"></video>
+
 ## Contribution
 Feel free to fork this project, make some changes, and submit a pull request. All contributions are welcome!
 
