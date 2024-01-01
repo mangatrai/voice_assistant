@@ -46,7 +46,7 @@ class VoiceAssistant:
             duration = 3  # Record for 3 seconds
             fs = 44100  # Sample rate
 
-            audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype=np.int16)
+            audio = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype=np.int16)
             sd.wait()
 
             # Save the NumPy array to a temporary wav file
